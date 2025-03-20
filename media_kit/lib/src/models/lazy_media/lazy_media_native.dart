@@ -53,25 +53,21 @@ class LazyMedia extends Media {
             }
           }
         }
-      } catch (exeception, stacktrace) {
-        print(exeception);
-        print(stacktrace);
+      } catch (exception, stacktrace) {
+        print(exception);
+        print(exception);
       }
       // LazyMedia.memory : Delete the temporary file.
       try {
         if (memory) {
           await File(uri).delete_();
         }
-      } catch (exeception, stacktrace) {
-        print(exeception);
+      } catch (exception, stacktrace) {
+        print(exception);
         print(stacktrace);
       }
     },
   );
-
-
-  /// Whether instance is instantiated from [LazyMedia.memory].
-  bool _memory = false;
 
   /// {@macro media}
   LazyMedia(
@@ -93,7 +89,7 @@ class LazyMedia extends Media {
       this,
       _LazyMediaFinalizerContext(
         uri,
-        _memory,
+        false,
       ),
     );
   }
@@ -132,9 +128,6 @@ class LazyMedia extends Media {
   @override
   String toString() =>
       'LazyMedia($uri, extras: $extras, httpHeaders: $httpHeaders, start: $start, end: $end)';
-
-  /// URI scheme used to identify Flutter assets.
-  static const String _kAssetScheme = 'asset://';
 
   /// Previously created [LazyMedia] instances.
   /// This [HashMap] is used to retrieve previously set [extras] & [httpHeaders].
