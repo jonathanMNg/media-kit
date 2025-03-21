@@ -4,12 +4,15 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 // ignore_for_file: library_private_types_in_public_api
+import 'dart:async';
 import 'dart:io';
 import 'dart:collection';
 import 'package:safe_local_storage/safe_local_storage.dart';
 import 'package:media_kit/src/player/native/utils/android_content_uri_provider.dart';
 
 import '../../../media_kit.dart';
+
+typedef ResolveSoundUrl = Future<Uri?> Function(String uniquidId);
 
 /// {@template media}
 ///
@@ -69,31 +72,58 @@ class LazyMedia extends Media {
     },
   );
 
+  final String uniqueId;
+  final ResolveSoundUrl resolveSoundUrl;
+  final _uriCompleter = Completer<String>();
+
+  String? resolveUriStr;
   /// {@macro media}
   LazyMedia(
-    super.resource, {
+    {
+    required this.uniqueId,
+    required this.resolveSoundUrl,
     Map<String, dynamic>? extras,
     Map<String, String>? httpHeaders,
+    // required this.uri,
     super.start,
     super.end,
-  })  {
-    // Increment reference count.
-    ref[uri] = ((ref[uri] ?? 0) + 1).clamp(0, 1 << 32);
-    // Store [this] instance in [cache].
-    cache[uri] = _LazyMediaCache(
-      extras: this.extras,
-      httpHeaders: this.httpHeaders,
-    );
-    // Attach [this] instance to [Finalizer].
-    _finalizer.attach(
-      this,
-      _LazyMediaFinalizerContext(
-        uri,
-        false,
-      ),
-    );
+  }) : super('') {
+    _init();
   }
 
+  Future<void> _init() async {
+    // uri = await resolveUri();
+    // print(uri);
+    resolveUriStr = await resolveUri();
+    _uriCompleter.complete(resolveUriStr);
+
+    // Increment reference count.
+    // ref[uri] = ((ref[uri] ?? 0) + 1).clamp(0, 1 << 32);
+    // // Store [this] instance in [cache].
+    // cache[uri] = _LazyMediaCache(
+    //   extras: extras,
+    //   httpHeaders: httpHeaders,
+    // );
+    // // Attach [this] instance to [Finalizer].
+    // _finalizer.attach(
+    //   this,
+    //   _LazyMediaFinalizerContext(
+    //     uri,
+    //     false,
+    //   ),
+    // );
+  }
+
+  @override
+  String get uri => '';
+
+  @override
+  Future<String> get futureUri => _uriCompleter.future;
+
+  Future<String> resolveUri() async {
+    final soundUrl = await resolveSoundUrl(uniqueId);
+    return soundUrl!.toString();
+  }
 
   /// For comparing with other [LazyMedia] instances.
   @override
@@ -106,24 +136,28 @@ class LazyMedia extends Media {
 
   /// For comparing with other [LazyMedia] instances.
   @override
-  int get hashCode => uri.hashCode;
+  int get hashCode => resolveUriStr.hashCode;
 
   /// Creates a copy of [this] instance with the given fields replaced with the new values.
-  // LazyMedia copyWith({
-  //   String? uri,
-  //   Map<String, dynamic>? extras,
-  //   Map<String, String>? httpHeaders,
-  //   Duration? start,
-  //   Duration? end,
-  // }) {
-  //   return LazyMedia(
-  //     uri ?? this.uri,
-  //     extras: extras ?? this.extras,
-  //     httpHeaders: httpHeaders ?? this.httpHeaders,
-  //     start: start ?? this.start,
-  //     end: end ?? this.end,
-  //   );
-  // }
+  @override
+  LazyMedia copyWith({
+    String? uri,
+    String? uniqueId,
+    Map<String, dynamic>? extras,
+    Map<String, String>? httpHeaders,
+    Duration? start,
+    Duration? end,
+  }) {
+    return LazyMedia(
+      // uri: uri ?? this.uri,
+      extras: extras ?? this.extras,
+      httpHeaders: httpHeaders ?? this.httpHeaders,
+      start: start ?? this.start,
+      end: end ?? this.end,
+      uniqueId: uniqueId ?? this.uniqueId,
+      resolveSoundUrl: resolveSoundUrl,
+    );
+  }
 
   @override
   String toString() =>

@@ -472,9 +472,8 @@ class NativePlayer extends PlatformPlayer {
         playlistController.add(playlist);
       }
       // ---------------------------------------------
-      final realUrl = await media.futureUri;
 
-      await _command(['loadfile', realUrl, 'append']);
+      await _command(['loadfile', media.uri, 'append']);
     }
 
     if (synchronized) {

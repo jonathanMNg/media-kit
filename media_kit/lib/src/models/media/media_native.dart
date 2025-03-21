@@ -77,6 +77,8 @@ class Media extends Playable {
   /// URI of the [Media].
   final String uri;
 
+  Future<String> get futureUri => Future.value(uri);
+
   /// Additional optional user data.
   ///
   /// Default: `null`.
@@ -105,9 +107,10 @@ class Media extends Playable {
     String resource, {
     Map<String, dynamic>? extras,
     Map<String, String>? httpHeaders,
+    String? uri,
     this.start,
     this.end,
-  })  : uri = normalizeURI(resource),
+  })  : uri = uri ??= normalizeURI(resource),
         extras = extras ?? cache[normalizeURI(resource)]?.extras,
         httpHeaders =
             httpHeaders ?? cache[normalizeURI(resource)]?.httpHeaders {
