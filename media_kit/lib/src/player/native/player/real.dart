@@ -204,6 +204,7 @@ class NativePlayer extends PlatformPlayer {
 
         await file.write_(list);
 
+        print('before playing');
         await _command(
           [
             'loadlist',
@@ -211,6 +212,7 @@ class NativePlayer extends PlatformPlayer {
             'append',
           ],
         );
+        print('after playing');
 
         Future.delayed(const Duration(seconds: 5), () {
           file.delete_();

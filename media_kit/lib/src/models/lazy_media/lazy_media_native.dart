@@ -88,14 +88,12 @@ class LazyMedia extends Media {
     super.start,
     super.end,
   }) : super('') {
-    _init();
+    // _init();
   }
 
   Future<void> _init() async {
     // uri = await resolveUri();
     // print(uri);
-    resolveUriStr = await resolveUri();
-    _uriCompleter.complete(resolveUriStr);
 
     // Increment reference count.
     // ref[uri] = ((ref[uri] ?? 0) + 1).clamp(0, 1 << 32);
@@ -118,10 +116,11 @@ class LazyMedia extends Media {
   String get uri => '';
 
   @override
-  Future<String> get futureUri => _uriCompleter.future;
+  Future<String> get futureUri => resolveUri();
 
   Future<String> resolveUri() async {
     final soundUrl = await resolveSoundUrl(uniqueId);
+    print(soundUrl.toString());
     return soundUrl!.toString();
   }
 
